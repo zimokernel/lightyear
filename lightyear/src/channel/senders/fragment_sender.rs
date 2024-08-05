@@ -5,6 +5,7 @@ use crate::packet::packet::FRAGMENT_SIZE;
 use crate::serialize::SerializationError;
 use crate::shared::tick_manager::Tick;
 
+
 /// `FragmentReceiver` is used to reconstruct fragmented messages
 #[derive(Debug)]
 pub(crate) struct FragmentSender {
@@ -32,7 +33,10 @@ impl FragmentSender {
         }
         let chunks = fragment_bytes.chunks(self.fragment_size);
         let num_fragments = chunks.len();
+        tracing::info!("build fragments num_fragments:{}\n",num_fragments);
+
         if num_fragments > u8::MAX as usize {
+            tracing::info!("build fragments Message too big\n");
             return Err(SerializationError::MessageTooBig(fragment_bytes.len()));
         }
         Ok(chunks

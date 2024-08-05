@@ -13,6 +13,7 @@ use bevy::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::scene::ScenePlugin;
 use bevy::state::app::StatesPlugin;
+use bevy::input::InputPlugin;
 use bevy::winit::{WakeUp, WinitPlugin};
 use bevy::DefaultPlugins;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -341,20 +342,26 @@ impl Apps {
 fn client_app(settings: Settings, net_config: client::NetConfig) -> (App, ClientConfig) {
     let mut app = App::new();
 
-    app.add_plugins(
-        DefaultPlugins
-            .build()
-            .set(AssetPlugin {
-                // https://github.com/bevyengine/bevy/issues/10157
-                meta_check: bevy::asset::AssetMetaCheck::Never,
-                ..default()
-            })
-            .set(LogPlugin {
-                level: Level::INFO,
-                filter: "wgpu=error,bevy_render=info,bevy_ecs=warn".to_string(),
-                ..default()
-            }),
-    );
+    // app.add_plugins(
+    //     DefaultPlugins
+    //         .build()
+    //         .set(AssetPlugin {
+    //             // https://github.com/bevyengine/bevy/issues/10157
+    //             meta_check: bevy::asset::AssetMetaCheck::Never,
+    //             ..default()
+    //         })
+    //         .set(LogPlugin {
+    //             level: Level::INFO,
+    //             filter: "wgpu=error,bevy_render=info,bevy_ecs=warn".to_string(),
+    //             ..default()
+    //         }),
+    // );
+    app.add_plugins((MinimalPlugins, StatesPlugin,InputPlugin, LogPlugin {
+        level: Level::INFO,
+        filter: "wgpu=error,bevy_render=info,bevy_ecs=warn".to_string(),
+        ..default()
+    }));
+
     if settings.client.inspector {
         app.add_plugins(WorldInspectorPlugin::new());
     }
