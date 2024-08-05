@@ -24,6 +24,7 @@ pub(crate) mod compression {
         }
 
         pub fn compress(&mut self, data: &[u8]) -> Result<&[u8]> {
+            // tracing::warn!("transport compress {}", std::mem::size_of_val(data));
             self.compressor
                 .compress_to_buffer(data, &mut self.result)
                 .map_err(|e| Error::Io(e))?;

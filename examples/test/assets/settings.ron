@@ -38,7 +38,7 @@ Settings(
         protocol_id: 0,
         private_key: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         // compression: Lz4,
-        compression: Zstd(level:4),
+        compression: None,
 
     )
 )

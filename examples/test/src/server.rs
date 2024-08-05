@@ -67,14 +67,14 @@ pub(crate) fn handle_connections(
         );
 
         // let message = Message1(5);
-        server_net
-            .send_message_to_target::<Channel1, Message1>(&Message1(5), NetworkTarget::All)
-            .unwrap_or_else(|e| {
-                error!("Failed to send message: {:?}", e);
-            });
+        // server_net
+        //     .send_message_to_target::<Channel1, Message1>(&Message1(5), NetworkTarget::All)
+        //     .unwrap_or_else(|e| {
+        //         error!("Failed to send message: {:?}", e);
+        //     });
 
         // for test: send a too big message , size > 300kb
-        let message = VeryLargeMessage::generate(100000);
+        let message = VeryLargeMessage::generate(400000);
         server_net
             .send_message_to_target::<UnorderedReliableChannel, VeryLargeMessage>(
                 &message,
