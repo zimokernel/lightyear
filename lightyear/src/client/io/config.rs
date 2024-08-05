@@ -12,12 +12,8 @@ use crate::transport::middleware::compression::zstd::compression::ZstdCompressor
 use crate::transport::middleware::compression::zstd::decompression::ZstdDecompressor;
 use crate::transport::middleware::conditioner::LinkConditioner;
 use crate::transport::middleware::PacketReceiverWrapper;
-#[cfg(not(target_family = "wasm"))]
 use crate::transport::udp::UdpSocketBuilder;
-#[cfg(feature = "websocket")]
-use crate::transport::websocket::client::WebSocketClientSocketBuilder;
-#[cfg(feature = "webtransport")]
-use crate::transport::webtransport::client::WebTransportClientSocketBuilder;
+
 use crate::transport::{BoxedReceiver, Transport, LOCAL_SOCKET};
 use bevy::prelude::TypePath;
 use crossbeam_channel::{Receiver, Sender};
@@ -28,20 +24,8 @@ use std::net::SocketAddr;
 #[derive(Clone, Debug, TypePath)]
 pub enum ClientTransport {
     /// Use a [`UdpSocket`](std::net::UdpSocket)
-    #[cfg(not(target_family = "wasm"))]
     UdpSocket(SocketAddr),
-    /// Use [`WebTransport`](https://wicg.github.io/web-transport/) as a transport layer
-    #[cfg(feature = "webtransport")]
-    WebTransportClient {
-        client_addr: SocketAddr,
-        server_addr: SocketAddr,
-        /// On wasm, we need to provide a hash of the certificate to the browser
-        #[cfg(target_family = "wasm")]
-        certificate_digest: String,
-    },
-    /// Use [`WebSocket`](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) as a transport
-    #[cfg(feature = "websocket")]
-    WebSocketClient { server_addr: SocketAddr },
+
     /// Use a crossbeam_channel as a transport. This is useful for testing.
     /// This is mostly for clients.
     LocalChannel {
@@ -55,34 +39,10 @@ pub enum ClientTransport {
 impl ClientTransport {
     pub(super) fn build(self) -> ClientTransportBuilderEnum {
         match self {
-            #[cfg(not(target_family = "wasm"))]
             ClientTransport::UdpSocket(addr) => {
                 ClientTransportBuilderEnum::UdpSocket(UdpSocketBuilder { local_addr: addr })
             }
-            #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-            ClientTransport::WebTransportClient {
-                client_addr,
-                server_addr,
-            } => ClientTransportBuilderEnum::WebTransportClient(WebTransportClientSocketBuilder {
-                client_addr,
-                server_addr,
-            }),
-            #[cfg(all(feature = "webtransport", target_family = "wasm"))]
-            ClientTransport::WebTransportClient {
-                client_addr,
-                server_addr,
-                certificate_digest,
-            } => ClientTransportBuilderEnum::WebTransportClient(WebTransportClientSocketBuilder {
-                client_addr,
-                server_addr,
-                certificate_digest,
-            }),
-            #[cfg(feature = "websocket")]
-            ClientTransport::WebSocketClient { server_addr } => {
-                ClientTransportBuilderEnum::WebSocketClient(WebSocketClientSocketBuilder {
-                    server_addr,
-                })
-            }
+           
             ClientTransport::LocalChannel { recv, send } => {
                 ClientTransportBuilderEnum::LocalChannel(LocalChannelBuilder { recv, send })
             }
@@ -92,15 +52,8 @@ impl ClientTransport {
 }
 
 impl Default for ClientTransport {
-    #[cfg(not(target_family = "wasm"))]
     fn default() -> Self {
         ClientTransport::UdpSocket(LOCAL_SOCKET)
-    }
-
-    #[cfg(target_family = "wasm")]
-    fn default() -> Self {
-        let (send, recv) = crossbeam_channel::unbounded();
-        ClientTransport::LocalChannel { recv, send }
     }
 }
 

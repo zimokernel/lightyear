@@ -15,8 +15,6 @@ exclude = ["/tests"]
 [dependencies]
 lightyear = { version = "0.16.4", path = "../../lightyear", features = [
     "steam",
-    "webtransport",
-    "websocket",
 ] }
 
 # utils

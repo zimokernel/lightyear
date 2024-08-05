@@ -12,31 +12,17 @@ use crate::transport::middleware::compression::zstd::decompression::ZstdDecompre
 use crate::transport::middleware::conditioner::LinkConditioner;
 use crate::transport::middleware::PacketReceiverWrapper;
 use crate::transport::udp::UdpSocketBuilder;
-#[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-use crate::transport::websocket::server::WebSocketServerSocketBuilder;
-#[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-use crate::transport::webtransport::server::WebTransportServerSocketBuilder;
+
 use crate::transport::BoxedReceiver;
 use crate::transport::Transport;
 use bevy::prelude::TypePath;
 use std::net::IpAddr;
-#[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-use wtransport::Identity;
 
 #[derive(Debug, TypePath)]
 pub enum ServerTransport {
     /// Use a [`UdpSocket`](std::net::UdpSocket)
     UdpSocket(SocketAddr),
-    /// Use [`WebTransport`](https://wicg.github.io/web-transport/) as a transport layer
-    #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-    WebTransportServer {
-        server_addr: SocketAddr,
-        /// Certificate that will be used for authentication
-        certificate: Identity,
-    },
-    /// Use [`WebSocket`](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) as a transport
-    #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-    WebSocketServer { server_addr: SocketAddr },
+
     /// Use a crossbeam_channel as a transport. This is useful for testing.
     /// This is server-only: each tuple corresponds to a different client.
     Channels {
@@ -58,20 +44,7 @@ impl Clone for ServerTransport {
             ServerTransport::UdpSocket(__self_0) => {
                 ServerTransport::UdpSocket(Clone::clone(__self_0))
             }
-            #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-            ServerTransport::WebTransportServer {
-                server_addr: __self_0,
-                certificate: __self_1,
-            } => ServerTransport::WebTransportServer {
-                server_addr: Clone::clone(__self_0),
-                certificate: __self_1.clone_identity(),
-            },
-            #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-            ServerTransport::WebSocketServer {
-                server_addr: __self_0,
-            } => ServerTransport::WebSocketServer {
-                server_addr: Clone::clone(__self_0),
-            },
+
             ServerTransport::Channels { channels: __self_0 } => ServerTransport::Channels {
                 channels: Clone::clone(__self_0),
             },
@@ -86,20 +59,7 @@ impl ServerTransport {
             ServerTransport::UdpSocket(addr) => {
                 ServerTransportBuilderEnum::UdpSocket(UdpSocketBuilder { local_addr: addr })
             }
-            #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-            ServerTransport::WebTransportServer {
-                server_addr,
-                certificate,
-            } => ServerTransportBuilderEnum::WebTransportServer(WebTransportServerSocketBuilder {
-                server_addr,
-                certificate,
-            }),
-            #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-            ServerTransport::WebSocketServer { server_addr } => {
-                ServerTransportBuilderEnum::WebSocketServer(WebSocketServerSocketBuilder {
-                    server_addr,
-                })
-            }
+
             ServerTransport::Channels { channels } => {
                 ServerTransportBuilderEnum::Channels(Channels::new(channels))
             }

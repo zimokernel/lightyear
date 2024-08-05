@@ -34,7 +34,6 @@ impl UdpSocketBuilder {
     }
 }
 
-#[cfg(not(target_family = "wasm"))]
 impl ClientTransportBuilder for UdpSocketBuilder {
     fn connect(
         self,
@@ -128,7 +127,6 @@ impl PacketReceiver for UdpSocketBuffer {
     }
 }
 
-#[cfg(not(target_family = "wasm"))]
 #[cfg(test)]
 mod tests {
     use std::net::SocketAddr;

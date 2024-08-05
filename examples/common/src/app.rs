@@ -8,12 +8,12 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use bevy::asset::ron;
+use bevy::input::InputPlugin;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::scene::ScenePlugin;
 use bevy::state::app::StatesPlugin;
-use bevy::input::InputPlugin;
 use bevy::winit::{WakeUp, WinitPlugin};
 use bevy::DefaultPlugins;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -34,19 +34,16 @@ use crate::shared::{shared_config, SERVER_REPLICATION_INTERVAL};
 pub enum Cli {
     /// We have the client and the server running inside the same app.
     /// The server will also act as a client. (i.e. one client acts as the 'host')
-    #[cfg(not(target_family = "wasm"))]
     HostServer {
         #[arg(short, long, default_value = None)]
         client_id: Option<u64>,
     },
-    #[cfg(not(target_family = "wasm"))]
     /// We will create two apps: a client app and a server app.
     /// Data gets passed between the two via channels.
     ClientAndServer {
         #[arg(short, long, default_value = None)]
         client_id: Option<u64>,
     },
-    #[cfg(not(target_family = "wasm"))]
     /// Dedicated server
     Server,
     /// The program will act as a client
@@ -77,16 +74,7 @@ impl Default for Cli {
 /// Parse the CLI arguments.
 /// `clap` doesn't run in wasm, so we simply run in Client mode with a random ClientId
 pub fn cli() -> Cli {
-    cfg_if::cfg_if! {
-        if #[cfg(target_family = "wasm")] {
-            let client_id = rand::random::<u64>();
-            Cli::Client {
-                client_id: Some(client_id)
-            }
-        } else {
-            Cli::parse()
-        }
-    }
+    Cli::parse()
 }
 
 /// Apps that will be returned from the `build_apps` function
@@ -116,7 +104,6 @@ impl Apps {
     /// Build the apps with the given settings and CLI options.
     pub fn new(settings: Settings, cli: Cli) -> Self {
         match cli {
-            #[cfg(not(target_family = "wasm"))]
             Cli::HostServer { client_id } => {
                 let client_net_config = client::NetConfig::Local {
                     id: client_id.unwrap_or(settings.client.client_id),
@@ -129,7 +116,6 @@ impl Apps {
                     server_config,
                 }
             }
-            #[cfg(not(target_family = "wasm"))]
             Cli::ClientAndServer { client_id } => {
                 // we will communicate between the client and server apps via channels
                 let (from_server_send, from_server_recv) = crossbeam_channel::unbounded();
@@ -163,7 +149,6 @@ impl Apps {
                     server_config,
                 }
             }
-            #[cfg(not(target_family = "wasm"))]
             Cli::Server => {
                 let (app, config) = server_app(settings, vec![]);
                 Apps::Server { app, config }
@@ -356,11 +341,16 @@ fn client_app(settings: Settings, net_config: client::NetConfig) -> (App, Client
     //             ..default()
     //         }),
     // );
-    app.add_plugins((MinimalPlugins, StatesPlugin,InputPlugin, LogPlugin {
-        level: Level::INFO,
-        filter: "wgpu=error,bevy_render=info,bevy_ecs=warn".to_string(),
-        ..default()
-    }));
+    app.add_plugins((
+        MinimalPlugins,
+        StatesPlugin,
+        InputPlugin,
+        LogPlugin {
+            level: Level::INFO,
+            filter: "wgpu=error,bevy_render=info,bevy_ecs=warn".to_string(),
+            ..default()
+        },
+    ));
 
     if settings.client.inspector {
         app.add_plugins(WorldInspectorPlugin::new());
@@ -374,7 +364,6 @@ fn client_app(settings: Settings, net_config: client::NetConfig) -> (App, Client
 }
 
 /// Build the server app with the `ServerPlugins` added.
-#[cfg(not(target_family = "wasm"))]
 fn server_app(
     settings: Settings,
     extra_transport_configs: Vec<server::ServerTransport>,
@@ -414,7 +403,6 @@ fn server_app(
 }
 
 /// An `App` that contains both the client and server plugins
-#[cfg(not(target_family = "wasm"))]
 fn combined_app(
     settings: Settings,
     extra_transport_configs: Vec<server::ServerTransport>,

@@ -62,8 +62,6 @@ app.add_channel::<Channel1>(ChannelSettings {
   send raw data on the network.
   The trait currently has several implementations:
     - UDP sockets
-    - WebTransport (using QUIC): available on both native and wasm!
-    - WebSocket: available on both native and wasm!
     - Steam: use the SteamWorks SDK to send messages over the Steam network
 - Serialization
     - *Lightyear* uses `bincode` as a default serializer, but you can provide your own serialization function

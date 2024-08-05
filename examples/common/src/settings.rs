@@ -8,13 +8,10 @@ use bevy::utils::Duration;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(target_family = "wasm"))]
 use async_compat::Compat;
-#[cfg(not(target_family = "wasm"))]
 use bevy::tasks::IoTaskPool;
 
 use lightyear::prelude::client::Authentication;
-#[cfg(not(target_family = "wasm"))]
 use lightyear::prelude::client::{SocketConfig, SteamConfig};
 use lightyear::prelude::{CompressionConfig, LinkConditionerConfig};
 
@@ -27,13 +24,7 @@ pub fn read_settings<T: DeserializeOwned>(settings_str: &str) -> T {
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum ClientTransports {
-    #[cfg(not(target_family = "wasm"))]
     Udp,
-    WebTransport {
-        certificate_digest: String,
-    },
-    WebSocket,
-    #[cfg(not(target_family = "wasm"))]
     Steam {
         app_id: u32,
     },
@@ -44,13 +35,7 @@ pub enum ServerTransports {
     Udp {
         local_port: u16,
     },
-    WebTransport {
-        local_port: u16,
-    },
-    WebSocket {
-        local_port: u16,
-    },
-    #[cfg(not(target_family = "wasm"))]
+   
     Steam {
         app_id: u32,
         server_ip: Ipv4Addr,
@@ -166,7 +151,6 @@ pub(crate) fn build_server_netcode_config(
 
 /// Parse the settings into a list of `NetConfig` that are used to configure how the lightyear server
 /// listens for incoming client connections
-#[cfg(not(target_family = "wasm"))]
 pub(crate) fn get_server_net_configs(settings: &Settings) -> Vec<server::NetConfig> {
     settings
         .server
@@ -181,40 +165,7 @@ pub(crate) fn get_server_net_configs(settings: &Settings) -> Vec<server::NetConf
                     *local_port,
                 )),
             ),
-            ServerTransports::WebTransport { local_port } => {
-                // this is async because we need to load the certificate from io
-                // we need async_compat because wtransport expects a tokio reactor
-                let certificate = IoTaskPool::get()
-                    .scope(|s| {
-                        s.spawn(Compat::new(async {
-                            server::Identity::load_pemfiles(
-                                "../certificates/cert.pem",
-                                "../certificates/key.pem",
-                            )
-                            .await
-                            .unwrap()
-                        }));
-                    })
-                    .pop()
-                    .unwrap();
-                let digest = certificate.certificate_chain().as_slice()[0].hash();
-                println!("Generated self-signed certificate with digest: {}", digest);
-                build_server_netcode_config(
-                    settings.server.conditioner.as_ref(),
-                    &settings.shared,
-                    server::ServerTransport::WebTransportServer {
-                        server_addr: SocketAddr::new(Ipv4Addr::UNSPECIFIED.into(), *local_port),
-                        certificate,
-                    },
-                )
-            }
-            ServerTransports::WebSocket { local_port } => build_server_netcode_config(
-                settings.server.conditioner.as_ref(),
-                &settings.shared,
-                server::ServerTransport::WebSocketServer {
-                    server_addr: SocketAddr::new(Ipv4Addr::UNSPECIFIED.into(), *local_port),
-                },
-            ),
+
             ServerTransports::Steam {
                 app_id,
                 server_ip,
@@ -279,7 +230,6 @@ pub fn get_client_net_config(settings: &Settings, client_id: u64) -> client::Net
     );
     let client_addr = SocketAddr::new(Ipv4Addr::UNSPECIFIED.into(), settings.client.client_port);
     match &settings.client.transport {
-        #[cfg(not(target_family = "wasm"))]
         ClientTransports::Udp => build_client_netcode_config(
             client_id,
             server_addr,
@@ -287,26 +237,7 @@ pub fn get_client_net_config(settings: &Settings, client_id: u64) -> client::Net
             &settings.shared,
             client::ClientTransport::UdpSocket(client_addr),
         ),
-        ClientTransports::WebTransport { certificate_digest } => build_client_netcode_config(
-            client_id,
-            server_addr,
-            settings.client.conditioner.as_ref(),
-            &settings.shared,
-            client::ClientTransport::WebTransportClient {
-                client_addr,
-                server_addr,
-                #[cfg(target_family = "wasm")]
-                certificate_digest: certificate_digest.to_string().replace(":", ""),
-            },
-        ),
-        ClientTransports::WebSocket => build_client_netcode_config(
-            client_id,
-            server_addr,
-            settings.client.conditioner.as_ref(),
-            &settings.shared,
-            client::ClientTransport::WebSocketClient { server_addr },
-        ),
-        #[cfg(not(target_family = "wasm"))]
+
         ClientTransports::Steam { app_id } => client::NetConfig::Steam {
             steamworks_client: None,
             config: SteamConfig {

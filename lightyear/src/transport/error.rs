@@ -6,12 +6,6 @@ pub enum Error {
     NotConnected,
     #[error(transparent)]
     Io(#[from] std::io::Error),
-    #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-    #[error(transparent)]
-    WebTransport(#[from] wtransport::error::ConnectingError),
-    #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-    #[error(transparent)]
-    WebSocket(#[from] tokio_tungstenite::tungstenite::error::Error),
     #[error("could not send message via channel: {0}")]
     Channel(String),
     #[error("requested by user")]

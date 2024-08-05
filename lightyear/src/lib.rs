@@ -290,17 +290,15 @@ pub mod prelude {
         pub use crate::connection::client::{
             Authentication, ClientConnection, IoConfig, NetClient, NetConfig,
         };
-        #[cfg(all(feature = "steam", not(target_family = "wasm")))]
+        #[cfg(all(feature = "steam"))]
         pub use crate::connection::steam::client::{SocketConfig, SteamConfig};
     }
     pub mod server {
-        #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-        pub use wtransport::tls::Identity;
-
+    
         pub use crate::connection::server::{
             IoConfig, NetConfig, NetServer, ServerConnection, ServerConnections,
         };
-        #[cfg(all(feature = "steam", not(target_family = "wasm")))]
+        #[cfg(all(feature = "steam"))]
         pub use crate::connection::steam::server::{SocketConfig, SteamConfig};
         pub use crate::server::clients::ControlledEntities;
         pub use crate::server::config::{NetcodeConfig, PacketConfig, ServerConfig};
@@ -324,7 +322,7 @@ pub mod prelude {
         pub use crate::server::run_conditions::{is_started, is_stopped};
     }
 
-    #[cfg(all(feature = "steam", not(target_family = "wasm")))]
+    #[cfg(all(feature = "steam"))]
     pub use crate::connection::steam::steamworks_client::SteamworksClient;
 }
 

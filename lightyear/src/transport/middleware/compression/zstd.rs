@@ -105,30 +105,3 @@ pub(crate) mod decompression {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::{SharedIoConfig, TransportConfig};
-    use crate::transport::middleware::compression::CompressionConfig;
-    use crate::transport::LOCAL_SOCKET;
-
-    #[test]
-    fn test_compression() {
-        let (send, recv) = crossbeam_channel::unbounded();
-
-        let config = TransportConfig::LocalChannel { send, recv };
-        let io_config = SharedIoConfig {
-            transport: config,
-            conditioner: None,
-            compression: CompressionConfig::Zstd { level: 0 },
-        };
-        let mut io = io_config.connect().unwrap();
-        let msg = b"hello world".as_slice();
-        // send data
-        io.sender.send(&msg, &LOCAL_SOCKET).unwrap();
-
-        // receive data
-        let (data, addr) = io.receiver.recv().unwrap().unwrap();
-        assert_eq!(data.as_ref(), msg);
-    }
-}

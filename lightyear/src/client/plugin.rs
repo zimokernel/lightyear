@@ -64,9 +64,6 @@ impl PluginGroup for ClientPlugins {
             .add(PredictionPlugin)
             .add(InterpolationPlugin::new(interpolation_config));
 
-        #[cfg(target_family = "wasm")]
-        let builder = builder.add(crate::client::web::WebPlugin);
-
         builder
     }
 }

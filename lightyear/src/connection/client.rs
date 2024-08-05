@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 use std::str::FromStr;
-#[cfg(all(feature = "steam", not(target_family = "wasm")))]
+#[cfg(all(feature = "steam"))]
 use std::sync::Arc;
 
 use bevy::prelude::{Reflect, Resource};

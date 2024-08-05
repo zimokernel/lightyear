@@ -4,12 +4,7 @@ use crate::transport::dummy::DummyIo;
 use crate::transport::error::Result;
 use crate::transport::io::IoState;
 use crate::transport::udp::{UdpSocket, UdpSocketBuilder};
-#[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-use crate::transport::websocket::server::{WebSocketServerSocket, WebSocketServerSocketBuilder};
-#[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-use crate::transport::webtransport::server::{
-    WebTransportServerSocket, WebTransportServerSocketBuilder,
-};
+
 use enum_dispatch::enum_dispatch;
 
 #[enum_dispatch]
@@ -28,10 +23,7 @@ pub(crate) trait ServerTransportBuilder: Send + Sync {
 #[enum_dispatch(ServerTransportBuilder)]
 pub(crate) enum ServerTransportBuilderEnum {
     UdpSocket(UdpSocketBuilder),
-    #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-    WebTransportServer(WebTransportServerSocketBuilder),
-    #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-    WebSocketServer(WebSocketServerSocketBuilder),
+
     Channels(Channels),
     Dummy(DummyIo),
 }
@@ -40,10 +32,7 @@ pub(crate) enum ServerTransportBuilderEnum {
 #[enum_dispatch(Transport)]
 pub(crate) enum ServerTransportEnum {
     UdpSocket(UdpSocket),
-    #[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-    WebTransportServer(WebTransportServerSocket),
-    #[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-    WebSocketServer(WebSocketServerSocket),
+
     Channels(Channels),
     Dummy(DummyIo),
 }

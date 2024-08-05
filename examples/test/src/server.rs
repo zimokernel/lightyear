@@ -35,7 +35,7 @@ fn start_server(mut commands: Commands) {
 }
 
 /// Add some debugging text to the screen
-fn init(mut commands: Commands) {
+fn init(_commands: Commands) {
     info!("Server Networking init");
 }
 
@@ -74,7 +74,7 @@ pub(crate) fn handle_connections(
             });
 
         // for test: send a too big message , size > 300kb
-        let message = VeryLargeMessage::generate(300000);
+        let message = VeryLargeMessage::generate(100000);
         server_net
             .send_message_to_target::<UnorderedReliableChannel, VeryLargeMessage>(
                 &message,

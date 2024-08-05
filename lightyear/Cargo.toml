@@ -23,23 +23,10 @@ metrics = [
     "metrics-exporter-prometheus",
 ]
 mock_time = ["dep:mock_instant"]
-webtransport = [
-    "dep:wtransport",
-    "dep:xwt-core",
-    "dep:xwt-web-sys",
-    "dep:web-sys",
-    "dep:ring",
-    "dep:wasm-bindgen-futures",
-]
+
 leafwing = ["dep:leafwing-input-manager"]
 avian2d = ["dep:avian2d"]
-websocket = [
-    "dep:tokio-tungstenite",
-    "dep:futures-util",
-    "dep:web-sys",
-    "dep:wasm-bindgen",
-    "dep:wasm-bindgen-futures",
-]
+
 steam = ["dep:steamworks"]
 
 # compression
@@ -112,8 +99,6 @@ lz4_flex = { version = "0.11", optional = true, default-features = false, featur
     "std",
 ] }
 
-# WebSocket
-futures-util = { version = "0.3.30", optional = true }
 
 # transport
 # we don't need any tokio features, we use only use the tokio channels
@@ -129,54 +114,16 @@ async-channel = "2.2.0"
 # connection
 # steamworks-sys doesn't build on wasm
 steamworks = { version = "0.11", optional = true }
-# webtransport
-wtransport = { version = "=0.1.13", optional = true, features = [
-    "self-signed",
-    "dangerous-configuration",
-] }
-# websocket
-tokio-tungstenite = { version = "0.23.0", optional = true, features = [
-    "connect",
-    "handshake",
-] }
+
+
 # compression
 zstd = { version = "0.13.1", optional = true }
 
-[target."cfg(target_family = \"wasm\")".dependencies]
-console_error_panic_hook = { version = "0.1.7" }
-ring = { version = "0.17.8", optional = true, default-features = false }
-web-sys = { version = "0.3", optional = true, features = [
-    "Document",
-    "WebTransport",
-    "WebTransportHash",
-    "WebTransportOptions",
-    "WebTransportBidirectionalStream",
-    "WebTransportSendStream",
-    "WebTransportReceiveStream",
-    "ReadableStreamDefaultReader",
-    "WritableStreamDefaultWriter",
-    "WebTransportDatagramDuplexStream",
-    "WebSocket",
-    "CloseEvent",
-    "ErrorEvent",
-    "MessageEvent",
-    "BinaryType",
-] }
-bevy_web_keepalive = "0.3"
+
 futures-lite = { version = "2.1.0", optional = true }
-getrandom = { version = "0.2.11", features = [
-    "js", # feature 'js' is required for wasm
-] }
-xwt-core = { version = "0.4", optional = true }
-xwt-web-sys = { version = "0.11", optional = true }
-wasm-bindgen = { version = "0.2.90", optional = true }
-wasm-bindgen-futures = { version = "0.4.42", optional = true }
-# compression
-zstd = { version = "0.13.1", optional = true, features = ["wasm"] }
 
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.39"
 mock_instant = { version = "0.4.0" }
 tracing-subscriber = "0.3.17"
 bitvec = "1.0"
@@ -187,5 +134,5 @@ approx = "0.5.1"
 [package.metadata.docs.rs]
 # we cannot use all-features = true, because we need to provide additional features for bevy_xpbd_2d
 # when building the docs
-features = ["metrics", "webtransport", "leafwing", "websocket", "steam", "zstd"]
+features = ["metrics",  "leafwing", "steam", "zstd"]
 rustdoc-args = ["--cfg", "docsrs"]

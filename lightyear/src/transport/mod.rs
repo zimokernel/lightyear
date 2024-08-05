@@ -14,18 +14,7 @@ use crate::transport::channels::Channels;
 use crate::transport::dummy::DummyIo;
 use crate::transport::local::LocalChannel;
 use crate::transport::udp::UdpSocket;
-#[cfg(feature = "websocket")]
-use crate::transport::websocket::client::{WebSocketClientSocket, WebSocketClientSocketBuilder};
-#[cfg(all(feature = "websocket", not(target_family = "wasm")))]
-use crate::transport::websocket::server::{WebSocketServerSocket, WebSocketServerSocketBuilder};
-#[cfg(feature = "webtransport")]
-use crate::transport::webtransport::client::{
-    WebTransportClientSocket, WebTransportClientSocketBuilder,
-};
-#[cfg(all(feature = "webtransport", not(target_family = "wasm")))]
-use crate::transport::webtransport::server::{
-    WebTransportServerSocket, WebTransportServerSocketBuilder,
-};
+
 
 /// io is a wrapper around the underlying transport layer
 pub mod io;
@@ -39,19 +28,12 @@ pub(crate) mod udp;
 /// The transport is a map of channels (used for server, during testing)
 pub(crate) mod channels;
 
-/// The transport is using WebTransport
-#[cfg_attr(docsrs, doc(cfg(feature = "webtransport")))]
-#[cfg(feature = "webtransport")]
-pub(crate) mod webtransport;
-
 pub(crate) mod middleware;
 
 pub mod config;
 pub(crate) mod dummy;
 pub(crate) mod error;
-#[cfg_attr(docsrs, doc(cfg(feature = "websocket")))]
-#[cfg(feature = "websocket")]
-pub(crate) mod websocket;
+
 
 pub const LOCAL_SOCKET: SocketAddr = SocketAddr::new(
     std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)),
